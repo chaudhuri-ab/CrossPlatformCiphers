@@ -75,9 +75,7 @@ public class Java_AES_Cipher {
 
             byte[] decodedEncryptedData = Base64.getDecoder().decode(parts[0]);
 
-            //System.out.println((new String(temp)).length() + " " + new String(temp));
             byte[] original = cipher.doFinal(decodedEncryptedData);
-            //original = Base64.getDecoder().decode(original);
 
             return new String(original);
         } catch (Exception ex) {
