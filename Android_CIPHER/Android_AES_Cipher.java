@@ -1,12 +1,12 @@
-package ciphers;
+package edu.purdue.cerias.ciphers;
 
-        import javax.crypto.Cipher;
-        import javax.crypto.spec.IvParameterSpec;
-        import javax.crypto.spec.SecretKeySpec;
+import android.util.Base64;
 
-        import android.util.Base64;
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
-public class Android_AES_Cipher {
+public class Java_AES_Cipher {
 
     private static String CIPHER_NAME = "AES/CBC/PKCS5PADDING";
     private static int CIPHER_KEY_LEN = 16; //128 bits
@@ -34,8 +34,8 @@ public class Android_AES_Cipher {
             }
 
 
-            IvParameterSpec initVector = new IvParameterSpec(iv.getBytes("UTF-8"));
-            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
+            IvParameterSpec initVector = new IvParameterSpec(iv.getBytes("ISO-8859-1"));
+            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("ISO-8859-1"), "AES");
 
             Cipher cipher = Cipher.getInstance(Java_AES_Cipher.CIPHER_NAME);
             cipher.init(Cipher.ENCRYPT_MODE, skeySpec, initVector);
@@ -43,7 +43,7 @@ public class Android_AES_Cipher {
             byte[] encryptedData = cipher.doFinal((data.getBytes()));
 
             String base64_EncryptedData = new String(Base64.encodeToString(encryptedData, Base64.DEFAULT));
-            String base64_IV = new String(Base64.encodeToString(iv.getBytes("UTF-8"), Base64.DEFAULT));
+            String base64_IV = new String(Base64.encodeToString(iv.getBytes("ISO-8859-1"), Base64.DEFAULT));
 
             return base64_EncryptedData + ":" + base64_IV;
 
@@ -65,10 +65,21 @@ public class Android_AES_Cipher {
     public static String decrypt(String key, String data) {
         try {
 
+            if (key.length() < Java_AES_Cipher.CIPHER_KEY_LEN) {
+                int numPad = Java_AES_Cipher.CIPHER_KEY_LEN - key.length();
+
+                for(int i = 0; i < numPad; i++){
+                    key += "0"; //0 pad to len 16 bytes
+                }
+
+            } else if (key.length() > Java_AES_Cipher.CIPHER_KEY_LEN) {
+                key = key.substring(0, CIPHER_KEY_LEN); //truncate to 16 bytes
+            }
+
             String[] parts = data.split(":");
 
             IvParameterSpec iv = new IvParameterSpec(Base64.decode(parts[1], Base64.DEFAULT));
-            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
+            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("ISO-8859-1"), "AES");
 
             Cipher cipher = Cipher.getInstance(Java_AES_Cipher.CIPHER_NAME);
             cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
