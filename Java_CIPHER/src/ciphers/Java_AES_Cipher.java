@@ -34,8 +34,8 @@ public class Java_AES_Cipher {
             }
             
             
-            IvParameterSpec initVector = new IvParameterSpec(iv.getBytes("UTF-8"));
-            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
+            IvParameterSpec initVector = new IvParameterSpec(iv.getBytes("ISO-8859-1"));
+            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("ISO-8859-1"), "AES");
 
             Cipher cipher = Cipher.getInstance(Java_AES_Cipher.CIPHER_NAME);
             cipher.init(Cipher.ENCRYPT_MODE, skeySpec, initVector);
@@ -43,7 +43,7 @@ public class Java_AES_Cipher {
             byte[] encryptedData = cipher.doFinal((data.getBytes()));
             
             String base64_EncryptedData = Base64.getEncoder().encodeToString(encryptedData);
-            String base64_IV = Base64.getEncoder().encodeToString(iv.getBytes("UTF-8"));
+            String base64_IV = Base64.getEncoder().encodeToString(iv.getBytes("ISO-8859-1"));
             
             return base64_EncryptedData + ":" + base64_IV;
             
@@ -64,11 +64,21 @@ public class Java_AES_Cipher {
     
     public static String decrypt(String key, String data) {
         try {
+            if (key.length() < Java_AES_Cipher.CIPHER_KEY_LEN) {
+                int numPad = Java_AES_Cipher.CIPHER_KEY_LEN - key.length();
+                
+                for(int i = 0; i < numPad; i++){
+                    key += "0"; //0 pad to len 16 bytes
+                }
+                
+            } else if (key.length() > Java_AES_Cipher.CIPHER_KEY_LEN) {
+                key = key.substring(0, CIPHER_KEY_LEN); //truncate to 16 bytes
+            }
             
             String[] parts = data.split(":");
             
             IvParameterSpec iv = new IvParameterSpec(Base64.getDecoder().decode(parts[1]));
-            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
+            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("ISO-8859-1"), "AES");
 
             Cipher cipher = Cipher.getInstance(Java_AES_Cipher.CIPHER_NAME);
             cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
